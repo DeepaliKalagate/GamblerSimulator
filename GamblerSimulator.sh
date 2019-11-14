@@ -1,34 +1,47 @@
-#!/bin/bash -x 
+#!/bin/bash -x  
 echo "Welcome in Gambler Game"
 
 STAKE=100
 BET=1
 win=0
+winCount=0
 winLimit=0
 loseLimit=0
 stakeOfGame=$STAKE
+stakeLimit=50
+totalDays=20
 
-stake=$(( ($stakeOfGame * 50) / 100 ))
-loseLimit=$(($stakeOfGame - $stake ))
-winLimit=$(( $stakeOfGame + $stake ))
+stake=$(( ($stakeOfGame * stakeLimit) / 100 ))
+loseLimit=$(($stakeOfGame-$stake))
+winLimit=$(($stakeOfGame+$stake ))
 
 
 function gamble()
 {
-	while [[ true ]]
+	totalAmount=0
+	for (( day=1; day<=$totalDays; day++ ))
 	do
-		if [[ $stakeOfGame -gt $loseLimit ]] && [[ $stakeOfGame -lt $winLimit ]]
-		then
-			break
-      bet=$((RANDOM%2))
-      	if [ $bet -eq $win ]
-        	then
-               		STAKE=$(( $STAKE+1 ))
-			break
-        	else
-                	STAKE=$(( $STAKE-1 ))
-        	fi
-		fi
+		STAKE=100
+		while [ true ]
+		do
+			if [ $STAKE -gt $winLimit ] || [ $STAKE -lt $loseLimit ]
+         then
+            toContinue="Resign for the day"
+            break
+         fi
+
+      		bet=$((RANDOM%2))
+      		if [ $bet -eq $win ]
+        		then
+            	STAKE=$(($STAKE+1))
+					((winCount++))
+        		else
+               STAKE=$(($STAKE-1))
+					((winCount--))
+        		fi
+				 echo "winCount" $winCount
+		done
+	totalAmount=$(($totalAmount+$winCount)) 
 	done
 }
 gamble
