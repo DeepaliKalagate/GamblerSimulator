@@ -12,12 +12,13 @@ declare winlimit=0
 declare TOTALSTAKE=10
 declare cash=0
 declare counter=1
+declare continuePlay=1
+
 declare -A monthHistory
 
 read -p "Enter days to play : " days
 
-month=$(( $DAYS / 30 ))
-while [ $month -eq 0 ]
+while [ $continuePlay -eq 1 ]
 do
 
 	read -p "Enter number of games to play per day : " gamesCount
@@ -51,6 +52,7 @@ do
 		done
 		echo "Total Gambled Amount:" $totalGambledAmount
 	}
+
 
 	function monthHistory()
 	{
@@ -121,8 +123,8 @@ do
 		echo "terminated"
 		break
 	else
-		read -p "would you like to continue ? press 1 for yes" value
-		if [ $value -eq 1 ]
+		read -p "Would you like to continue playing the Game? press 1 for yes : " userInput
+		if [ $userInput -eq 1 ]
 		then
 			month=$(( $month - 1))
 		else
