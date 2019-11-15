@@ -1,26 +1,30 @@
 #!/bin/bash -x  
 echo "Welcome in Gambler Game"
 
+#Constant Variables
 declare WIN=1
 declare BET=1
 declare DAYS=20
+declare TOTALSTAKE=100
+declare CONTINUEPLAY=1
+
+#Variables
 declare totalGambledAmount=0
 declare totalGambledAmountWon=0
 declare totalGambledAmountLose=0
 declare loselimit=0
 declare winlimit=0
-declare TOTALSTAKE=10
 declare cash=0
 declare counter=1
-declare continuePlay=1
 
+#Dictionary
 declare -A monthHistory
 
-read -p "Enter days to play : " days
+
 
 while [ $continuePlay -eq 1 ]
 do
-
+	read -p "Enter days to play : " days
 	read -p "Enter number of games to play per day : " gamesCount
 
 	function limit()
@@ -113,6 +117,8 @@ do
 			fi
 		done
 	}
+
+#Main Program Starts
 
 	gamble
 	daysWonOrLose
