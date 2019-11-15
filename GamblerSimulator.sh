@@ -8,14 +8,15 @@ declare WIN=1;
 declare DAYS=20;
 
 declare stake=100;
-declare maxAllowance=$(( $stake+ (( $stake /2 )) ))
+declare maxAllowance=$(( $stake+ (( $stake /2 )) )); 
 declare leastAllowance=$(( $stake/2 ))
 declare totalAmount=0;
 declare initialDayStake=100;
+declare dayslost=0;
+declare dayswon=0;
 
 function bet()
 {
-
 	checkBet=$(( RANDOM % 2 ))
 	if [ $checkBet -eq $WIN ]
 		then
@@ -24,16 +25,14 @@ function bet()
 		stake=$(( $stake - 1 ))
 	fi
 }
-
-function calculativeGame()
- {
+function calculativeGame() 
+{
 
 	while [[ $stake -lt $maxAllowance ]] && [[ $stake -gt $leastAllowance ]]
 	do
 		bet
 	done
 }
-
 function daywiseDictionary()
 {
 
@@ -46,20 +45,41 @@ function daywiseDictionary()
           totalAmount=$(($totalAmount+$stake-$initialDayStake))
 	fi
 }
-
-function 20dayPlay() 
+function winlostDays()
 {
-	for(( day=1; day <= $DAYS; day++ ))
+	for dayy in ${!daywiseAmountTrack[@]}
 	do
-			echo "-------day"$day"-------"
-			stake=100;
-			calculativeGame
-			daywiseDictionary
+		if [ ${daywiseAmountTrack[$dayy]} -ge $leastAllowance ]
+			then
+			((dayswon++))
+			echo "------day"$dayy "he won" ${daywiseAmountTrack[$dayy]}
+			elif [ ${daywiseAmountTrack[$dayy]} -le $leastAllowance ]
+			then
+			dayslost=$(($dayslost+1))
+			echo "------day"$dayy "he lost " ${daywiseAmountTrack[$dayy]}
+			fi
 	done
 }
 
 
+
+function 20dayPlay() 
+{
+
+   for(( day=1; day <= $DAYS; day++ ))
+   do
+         echo "--------------day"$day"-------"
+         stake=100;
+         calculativeGame
+         daywiseDictionary
+   done
+   winlostDays
+}
+
 #bet
 #calculativeGame
 20dayPlay
-echo "max total at the end of he day is" $totalAmount
+echo "Max total at the end of he day is=" $totalAmount
+echo "Days he won the bets= $dayswon"
+echo "Days he lost the bets= $dayslost"
+echo ${#daywiseAmountTrack[@]}
