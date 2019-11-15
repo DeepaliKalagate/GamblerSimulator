@@ -1,117 +1,132 @@
 #!/bin/bash -x  
 echo "Welcome in Gambler Game"
 
-declare -A daywiseAmountTrack
-declare -A daywiseGrowthTrack
-declare BET_AMOUNT=1;
-declare WIN=1;
-declare DAYS=20;
+declare WIN=1
+declare BET=1
+declare DAYS=20
+declare totalGambledAmount=0
+declare totalGambledAmountWon=0
+declare totalGambledAmountLose=0
+declare loselimit=0
+declare winlimit=0
+declare TOTALSTAKE=10
+declare cash=0
+declare counter=1
+declare -A monthHistory
 
-declare stake=100;
-declare maxAllowance=$(( $stake+ (( $stake /2 )) ));
-declare leastAllowance=$(( $stake/2 ))
-declare totalAmount=0;
-declare initialDayStake=100;
-declare dayslost=0;
-declare dayswon=0;
-declare unluckyday=0
-declare luckyday=0;
-declare maxAmount=-10000;
-declare leastAmount=10000;
-declare counter=0
+read -p "Enter days to play : " days
 
-function bet()
-{
-	checkBet=$(( RANDOM % 2 ))
-	if [ $checkBet -eq $WIN ]
+month=$(( $DAYS / 30 ))
+while [ $month -eq 0 ]
+do
+
+	read -p "Enter number of games to play per day : " gamesCount
+
+	function limit()
+	{
+		calc=$(( $TOTALSTAKE / 2 ))
+		loselimit=$(( $TOTALSTAKE - $calc ))
+		winlimit=$(( $TOTALSTAKE + $calc ))
+	}
+
+
+	function gamble()
+	{
+		echo "Playing for Month "$counter
+		counter=$(($counter+1))
+		for (( i=1; i<=$DAYS; i++ ))
+		do
+			cash=$TOTALSTAKE
+			limit
+			echo "Todays cash : " $cash
+			echo "Todays goal : " $winlimit
+			echo "Todays breakout : " $loselimit
+			while [[ $cash -gt $loselimit ]] && [[ $cash -lt $winlimit ]]
+			do
+				winOrlose
+				echo day:$i $cash
+			done
+			echo "Gambling limit for the day reached.." $cash
+			monthHistory $TOTALSTAKE  $cash $i
+		done
+		echo "Total Gambled Amount:" $totalGambledAmount
+	}
+
+	function monthHistory()
+	{
+		if [ $2 -ge $1 ]
 		then
-		stake=$(( $stake + 1 ))
+			difference=$(( $2 - $1 ))
+			monthHistory["day"$3]=$difference
+			totalGambledAmountWon=$(( $totalGambledAmountWon + $difference ))
 		else
-		stake=$(( $stake - 1 ))
-	fi
-}
-function calculativeGame() 
-{
-
-	while [[ $stake -lt $maxAllowance ]] && [[ $stake -gt $leastAllowance ]]
-	do
-		bet
-	done
-}
-function daywiseDictionary()
-{
-	
-	if [ $stake -eq $leastAllowance ]
-	then
-          daywiseAmountTrack[$day]=$(($stake-$initialDayStake))
-				totalAmount=$(($totalAmount-stake))
-
-			daywiseGrowthTrack[$counter]=$totalAmount
-			counter=$(($counter+1))
-			else
-          daywiseAmountTrack[$day]=$(($stake-$initialDayStake))
-          totalAmount=$(($totalAmount+$stake-$initialDayStake))
-			 daywiseGrowthTrack[$(($counter+1))]=$totalAmount
-			counter=$(($counter+1))
-
-	fi
-}
-function winlostDays()
-{
-
-	for dayy in ${!daywiseAmountTrack[@]}
-	do
-		if [ ${daywiseAmountTrack[$dayy]} -ge $leastAllowance ]
-			then
-			((dayswon++))
-			echo "------day"$dayy "he won" ${daywiseAmountTrack[$dayy]}
-			elif [ ${daywiseAmountTrack[$dayy]} -le $leastAllowance ]
-			then
-			dayslost=$(($dayslost+1))
-			echo "------day"$dayy "he lost " ${daywiseAmountTrack[$dayy]}
-			fi
-	done
-}
-function luckyunlucky() 
-{
-
-	for dayy in ${!daywiseGrowthTrack[@]}
-	do
-	value=${daywiseGrowthTrack[$dayy]}
-		if [ $value -gt $maxAmount ]
-		then
-		maxAmount=$value
-		luckyday=$dayy
-	elif [ $value -lt $leastAmount ]
-			then
-			leastAmount=$value
-			unluckyday=$dayy
+			difference="-"$(( $1 - $2 ))
+			monthHistory["day"$3]=$difference
+			totalGambledAmountLose=$(( $totalGambledAmountlose + $difference ))
 		fi
-	done
-}
+		totalGambledAmount=$(( $totalGambledAmount + $difference ))
+
+	}
 
 
-function 20dayPlay()
-{
+	function winOrlose()
+	{
+		check=$((RANDOM%2))
+		if [ $check -eq $WIN ]
+		then
+			cash=$(( $cash+$BET ))
+		else
+			cash=$(( $cash-$BET ))
+		fi
+	}
 
-   for(( day=1; day <= $DAYS; day++ ))
-   do
-         echo "--------------day"$day"-------"
-         stake=100;
-         calculativeGame
-         daywiseDictionary
-   done
-   winlostDays
-luckyunlucky
-}
 
-#bet
-#calculativeGame
-20dayPlay
-echo "Max total at the end of he day is" $totalAmount
-echo $dayswon "days he won the bets"
-echo $dayslost "days he lost the bets"
-echo ${daywiseAmountTrack[@]}
+	function daysWonOrLose()
+	{
+		echo "Days Won And Lose in a month"
+		for day in ${!monthHistory[@]}
+		do
+			echo $day" : "${monthHistory["$day"]}
+		done
+	}
 
-echo "unlucky day is" $unluckyday "with amount" $leastAmount
-echo "luckiest day is" $luckyday "with amount" $maxAmount
+	function FindluckyUnluckyDay()
+	{
+		luckyDay=$(printf "%s\n"  ${monthHistory[@]} | sort -nr | head -1 )
+		unluckyDay=$(printf "%s\n"  ${monthHistory[@]} | sort -n | head -1 )
+		PrintLuckyUnluckyDay $luckyDay $unluckyDay
+	}
+
+	function PrintLuckyUnluckyDay()
+	{
+		for day in ${!monthHistory[@]}
+		do
+			if [ ${monthHistory["$day"]} -eq $1 ]
+			then
+				echo "LuckyDay :" $day ":" ${monthHistory["$day"]}
+			fi
+			if [ ${monthHistory["$day"]} -eq $2 ]
+			then
+				echo "UnluckyDay :" $day ":" ${monthHistory["$day"]}
+			fi
+		done
+	}
+
+	gamble
+	daysWonOrLose
+	FindluckyUnluckyDay
+
+	if [[ $totalGambledAmountWon -lt 0  ]] || [[ $month -eq 1 ]]
+	then
+		echo "terminated"
+		break
+	else
+		read -p "would you like to continue ? press 1 for yes" value
+		if [ $value -eq 1 ]
+		then
+			month=$(( $month - 1))
+		else
+			break
+		fi
+	fi
+done
