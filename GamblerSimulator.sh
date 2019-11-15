@@ -1,48 +1,65 @@
 #!/bin/bash -x  
 echo "Welcome in Gambler Game"
 
-STAKE=100
-BET=1
-win=0
-winCount=0
-winLimit=0
-loseLimit=0
-stakeOfGame=$STAKE
-stakeLimit=50
-totalDays=20
+declare -A daywiseAmountTrack
 
-stake=$(( ($stakeOfGame * stakeLimit) / 100 ))
-loseLimit=$(($stakeOfGame-$stake))
-winLimit=$(($stakeOfGame+$stake ))
+declare BET_AMOUNT=1;
+declare WIN=1;
+declare DAYS=20;
 
+declare stake=100;
+declare maxAllowance=$(( $stake+ (( $stake /2 )) ))
+declare leastAllowance=$(( $stake/2 ))
+declare totalAmount=0;
+declare initialDayStake=100;
 
-function gamble()
+function bet()
 {
-	totalAmount=0
-	for (( day=1; day<=$totalDays; day++ ))
-	do
-		STAKE=100
-		while [ true ]
-		do
-			if [ $STAKE -gt $winLimit ] || [ $STAKE -lt $loseLimit ]
-         then
-            toContinue="Resign for the day"
-            break
-         fi
 
-      		bet=$((RANDOM%2))
-      		if [ $bet -eq $win ]
-        		then
-            	STAKE=$(($STAKE+1))
-					((winCount++))
-        		else
-               STAKE=$(($STAKE-1))
-					((winCount--))
-        		fi
-				 echo "winCount" $winCount
-		done
-	totalAmount=$(($totalAmount+$winCount)) 
+	checkBet=$(( RANDOM % 2 ))
+	if [ $checkBet -eq $WIN ]
+		then
+		stake=$(( $stake + 1 ))
+		else
+		stake=$(( $stake - 1 ))
+	fi
+}
+
+function calculativeGame()
+ {
+
+	while [[ $stake -lt $maxAllowance ]] && [[ $stake -gt $leastAllowance ]]
+	do
+		bet
 	done
 }
-gamble
 
+function daywiseDictionary()
+{
+
+	if [ $stake -eq $leastAllowance ]
+          then
+          daywiseAmountTrack[$day]=$(($stake-$initialDayStake))
+          totalAmount=$(($totalAmount-stake))
+			else
+          daywiseAmountTrack[$day]=$(($stake-$initialDayStake))
+          totalAmount=$(($totalAmount+$stake-$initialDayStake))
+	fi
+}
+
+function 20dayPlay() 
+{
+	for(( day=1; day <= $DAYS; day++ ))
+	do
+			echo "-------day"$day"-------"
+			stake=100;
+			calculativeGame
+			daywiseDictionary
+	done
+}
+
+
+#bet
+#calculativeGame
+20dayPlay
+echo "max total at the end of he day is" $totalAmount
