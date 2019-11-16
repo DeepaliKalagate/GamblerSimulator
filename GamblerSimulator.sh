@@ -96,14 +96,14 @@ do
 		done
 	}
 
-	function FindluckyUnluckyDay()
+	function findLuckyUnluckyDay()
 	{
 		luckyDay=$(printf "%s\n"  ${monthHistory[@]} | sort -nr | head -1 )
 		unluckyDay=$(printf "%s\n"  ${monthHistory[@]} | sort -n | head -1 )
-		PrintLuckyUnluckyDay $luckyDay $unluckyDay
+		printLuckyUnluckyDay $luckyDay $unluckyDay
 	}
 
-	function PrintLuckyUnluckyDay()
+	function printLuckyUnluckyDay()
 	{
 		for day in ${!monthHistory[@]}
 		do
@@ -122,7 +122,7 @@ do
 
 	gamble
 	daysWonOrLose
-	FindluckyUnluckyDay
+	findLuckyUnluckyDay
 
 	if [[ $totalGambledAmountWon -lt 0  ]] || [[ $month -eq 1 ]]
 	then
